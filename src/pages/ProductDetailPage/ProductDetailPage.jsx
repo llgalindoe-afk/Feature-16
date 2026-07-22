@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import useProduct from '../../hooks/useProduct';
 import useReviews from '../../hooks/useReviews';
 import ReviewList from '../../components/ReviewList/ReviewList';
 import Button from '../../components/Button/Button';
+import WishlistButton from '../../components/WishlistButton/WishlistButton';
+import ReviewForm from '../../components/ReviewForm/ReviewForm';
+import { addCartItem } from '../../store/cartSlice';
 
 function ProductDetailPage() {
   const { id } = useParams();
+  const dispatch = useDispatch();
+  const { token } = useSelector((state) => state.auth);
   
   const [selectedSize, setSelectedSize] = useState("40");
   const [quantity, setQuantity] = useState(1);
 
   const { data: product, loading: productLoading, error: productError } = useProduct(id);
-  const { data: reviews, loading: reviewsLoading, error: reviewsError } = useReviews(id);
+  const { data: reviews, loading: reviewsLoading, error: reviewsError, refresh } = useReviews(id);
 
   if (productLoading) {
     return (
@@ -47,7 +53,11 @@ function ProductDetailPage() {
 
       <div className="detail-layout detail-editorial elegant-detail">
         <div className="panel image-panel detail-gallery">
-          <img src={product.image} alt={product.name} className="detail-image" />
+          <img 
+            src={product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `http://localhost:3000/${product.imageUrl}`) : product.image || 'https://via.placeholder.com/400'} 
+            alt={product.name} 
+            className="detail-image" 
+          />
         </div>
 
         <div className="panel stack-lg detail-info">
@@ -97,16 +107,20 @@ function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="detail-actions-column">
+          <div className="detail-actions-column" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <Button
               variant="primary"
-              onClick={() => alert(`Añadido al carrito: ${quantity} x ${product.name} (Talla ${selectedSize})`)}
+              onClick={() => {
+                dispatch(addCartItem({ productId: product.id, quantity, size: selectedSize, product }));
+                alert(`¡Añadido al carrito! ${quantity}x ${product.name} (Talla ${selectedSize})`);
+              }}
+              style={{ flex: 1 }}
             >
               Añadir al carrito
             </Button>
-            <Button variant="secondary">
-              Guardar en wishlist
-            </Button>
+            <div style={{ transform: 'translateY(-2px)' }}>
+              <WishlistButton product={product} />
+            </div>
           </div>
 
           <div className="detail-description-block">
@@ -138,6 +152,9 @@ function ProductDetailPage() {
           <ReviewList reviews={product.reviews || []} />
         ) : (
           <ReviewList reviews={reviews && reviews.length > 0 ? reviews : product.reviews || []} />
+        )}
+        {token && (
+          <ReviewForm productId={product.id} onReviewAdded={refresh} />
         )}
       </div>
     </section>

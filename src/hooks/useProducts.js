@@ -15,7 +15,7 @@ export function useProducts() {
       try {
         const result = await getProducts();
         if (isMounted) {
-          setData(result);
+          setData(result.data || result);
         }
       } catch (err) {
         if (isMounted) {

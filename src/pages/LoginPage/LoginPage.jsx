@@ -1,12 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import FormInput from '../../components/FormInput/FormInput';
 import Button from '../../components/Button/Button';
-import { login } from '../../api/auth';
+import { loginThunk, clearError } from '../../store/authSlice';
 
 function LoginPage() {
   const emailInputRef = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { loading, error: reduxError } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -14,16 +18,18 @@ function LoginPage() {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  // Focus first input using useRef
+  // Focus first input using useRef and clear any auth errors
   useEffect(() => {
     if (emailInputRef.current) {
       emailInputRef.current.focus();
     }
-  }, []);
+    dispatch(clearError());
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,22 +57,17 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerError(null);
     setSuccessMsg(null);
+    dispatch(clearError());
 
     if (!validate()) return;
 
-    setLoading(true);
-    try {
-      const response = await login(formData);
+    const result = await dispatch(loginThunk(formData));
+    if (loginThunk.fulfilled.match(result)) {
       setSuccessMsg('¡Inicio de sesión exitoso!');
       setTimeout(() => {
         navigate('/');
       }, 1500);
-    } catch (err) {
-      setServerError(err.response?.data?.message || err.message || 'Error al iniciar sesión. Comprueba tus credenciales.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -77,9 +78,9 @@ function LoginPage() {
         <h2>Iniciar Sesión</h2>
         <p className="lead">Accede a tu cuenta para gestionar tus compras y preferencias.</p>
 
-        {serverError && (
+        {reduxError && (
           <div className="error-banner">
-            <p>{serverError}</p>
+            <p>{reduxError}</p>
           </div>
         )}
 

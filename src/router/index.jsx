@@ -7,6 +7,11 @@ import ProductDetailPage from '../pages/ProductDetailPage/ProductDetailPage';
 import LoginPage from '../pages/LoginPage/LoginPage';
 import RegisterPage from '../pages/RegisterPage/RegisterPage';
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
+import PrivateRoute from '../components/PrivateRoute/PrivateRoute';
+import CartPage from '../pages/CartPage/CartPage';
+import WishlistPage from '../pages/WishlistPage/WishlistPage';
+import ProfilePage from '../pages/ProfilePage/ProfilePage';
+import CheckoutSuccessPage from '../pages/CheckoutSuccessPage/CheckoutSuccessPage';
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +37,27 @@ export const router = createBrowserRouter([
       {
         path: 'register',
         element: <RegisterPage />
+      },
+      {
+        element: <PrivateRoute />,
+        children: [
+          {
+            path: 'cart',
+            element: <CartPage />
+          },
+          {
+            path: 'wishlist',
+            element: <WishlistPage />
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />
+          },
+          {
+            path: 'checkout',
+            element: <CheckoutSuccessPage />
+          }
+        ]
       },
       {
         path: '*',

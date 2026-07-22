@@ -1,14 +1,11 @@
 import api from './axios';
 
 export const getReviews = async (productId) => {
-  try {
-    const response = await api.get(`/products/${productId}/reviews`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.status === 404) {
-      const response = await api.get('/reviews', { params: { productId } });
-      return response.data;
-    }
-    throw error;
-  }
+  const response = await api.get(`/api/products/${productId}/reviews`);
+  return response.data.data || response.data;
+};
+
+export const postReview = async (productId, reviewData) => {
+  const response = await api.post(`/api/products/${productId}/reviews`, reviewData);
+  return response.data.data || response.data;
 };

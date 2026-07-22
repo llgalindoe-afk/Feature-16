@@ -1,12 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import FormInput from '../../components/FormInput/FormInput';
 import Button from '../../components/Button/Button';
-import { register } from '../../api/auth';
+import { registerThunk, clearError } from '../../store/authSlice';
 
 function RegisterPage() {
   const nameInputRef = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { loading, error: reduxError } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -16,16 +20,18 @@ function RegisterPage() {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  // Focus first input using useRef
+  // Focus first input using useRef and clear any auth errors
   useEffect(() => {
     if (nameInputRef.current) {
       nameInputRef.current.focus();
     }
-  }, []);
+    dispatch(clearError());
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,26 +71,22 @@ function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerError(null);
     setSuccessMsg(null);
+    dispatch(clearError());
 
     if (!validate()) return;
 
-    setLoading(true);
-    try {
-      const response = await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      });
+    const result = await dispatch(registerThunk({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password
+    }));
+
+    if (registerThunk.fulfilled.match(result)) {
       setSuccessMsg('¡Registro completado con éxito! Redirigiendo al inicio...');
       setTimeout(() => {
         navigate('/login');
       }, 1500);
-    } catch (err) {
-      setServerError(err.response?.data?.message || err.message || 'Error al completar el registro. Inténtalo de nuevo.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -95,9 +97,9 @@ function RegisterPage() {
         <h2>Crear Cuenta</h2>
         <p className="lead">Únete a Cositas Lab para disfrutar de una experiencia de compra personalizada.</p>
 
-        {serverError && (
+        {reduxError && (
           <div className="error-banner">
-            <p>{serverError}</p>
+            <p>{reduxError}</p>
           </div>
         )}
 

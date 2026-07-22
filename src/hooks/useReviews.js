@@ -5,6 +5,9 @@ export function useReviews(productId) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refresh = () => setRefreshTrigger(prev => prev + 1);
 
   useEffect(() => {
     if (!productId) return;
@@ -35,9 +38,9 @@ export function useReviews(productId) {
     return () => {
       isMounted = false;
     };
-  }, [productId]);
+  }, [productId, refreshTrigger]);
 
-  return { data, loading, error };
+  return { data, loading, error, refresh };
 }
 
 export default useReviews;
