@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { mockProducts } from '../../data/mockProducts';
+import useProducts from '../../hooks/useProducts';
 import ProductCard from '../../components/ProductCard/ProductCard';
 
 function HomePage() {
-  // Slice the first 4 products as featured items
-  const featuredProducts = mockProducts.slice(0, 4);
+  const { data: products, loading, error } = useProducts();
+
+  const featuredProducts = Array.isArray(products) ? products.slice(0, 4) : [];
 
   return (
     <section className="stack-xl">
@@ -41,11 +42,31 @@ function HomePage() {
         <h2 style={{ margin: '0 0 1.5rem 0', letterSpacing: '-0.05em', fontSize: '2rem', textTransform: 'uppercase' }}>
           Productos Destacados
         </h2>
-        <div className="product-grid compact-grid elegant-grid">
-          {featuredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        
+        {loading && (
+          <div className="loading-state">
+            <div className="spinner"></div>
+            <p className="lead">Cargando productos destacados...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="error-banner">
+            <p>Error: {error}</p>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <div className="product-grid compact-grid elegant-grid">
+            {featuredProducts.length > 0 ? (
+              featuredProducts.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <p className="lead">No hay productos disponibles.</p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="home-editorial-strip">

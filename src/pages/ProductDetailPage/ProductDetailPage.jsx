@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { mockProducts } from '../../data/mockProducts';
+import useProduct from '../../hooks/useProduct';
+import useReviews from '../../hooks/useReviews';
+import ReviewList from '../../components/ReviewList/ReviewList';
+import Button from '../../components/Button/Button';
 
 function ProductDetailPage() {
   const { id } = useParams();
   
   const [selectedSize, setSelectedSize] = useState("40");
   const [quantity, setQuantity] = useState(1);
-  
-  // Find the product by ID
-  const product = mockProducts.find(p => p.id === id);
 
-  if (!product) {
+  const { data: product, loading: productLoading, error: productError } = useProduct(id);
+  const { data: reviews, loading: reviewsLoading, error: reviewsError } = useReviews(id);
+
+  if (productLoading) {
     return (
-      <div className="panel" style={{ textAlign: 'center', padding: '3rem' }}>
+      <div className="panel loading-state" style={{ textAlign: 'center', padding: '4rem' }}>
+        <div className="spinner"></div>
+        <p className="lead">Cargando detalle del producto...</p>
+      </div>
+    );
+  }
+
+  if (productError || !product) {
+    return (
+      <div className="panel error-banner" style={{ textAlign: 'center', padding: '3rem' }}>
         <h2>Producto no encontrado</h2>
-        <p className="lead">El producto que buscas no existe en nuestro catálogo actual.</p>
+        <p className="lead">{productError || 'El producto que buscas no existe o no se pudo cargar.'}</p>
         <div style={{ marginTop: '1.5rem' }}>
           <Link to="/products" className="button-link">
             Volver al catálogo
@@ -24,8 +36,6 @@ function ProductDetailPage() {
       </div>
     );
   }
-
-  const reviews = product.reviews || [];
 
   return (
     <section className="stack-xl">
@@ -49,7 +59,7 @@ function ProductDetailPage() {
 
           <div className="detail-meta">
             <span>{product.category}</span>
-            <strong>{product.price.toFixed(2)} €</strong>
+            <strong>{Number(product.price).toFixed(2)} €</strong>
           </div>
 
           <div className="detail-section">
@@ -88,16 +98,15 @@ function ProductDetailPage() {
           </div>
 
           <div className="detail-actions-column">
-            <button 
-              type="button" 
-              className="button-link submit-button"
+            <Button
+              variant="primary"
               onClick={() => alert(`Añadido al carrito: ${quantity} x ${product.name} (Talla ${selectedSize})`)}
             >
               Añadir al carrito
-            </button>
-            <button type="button" className="button-link secondary-link">
+            </Button>
+            <Button variant="secondary">
               Guardar en wishlist
-            </button>
+            </Button>
           </div>
 
           <div className="detail-description-block">
@@ -123,49 +132,13 @@ function ProductDetailPage() {
       <div className="panel reviews-panel">
         <p className="eyebrow">Opiniones</p>
         <h3>Opiniones de clientes</h3>
-        <div className="reviews-grid">
-          {reviews.length > 0 ? (
-            reviews.map((rev, index) => (
-              <div key={index} className="fake-box">
-                <div className="review-stars" aria-label={`${rev.rating} de 5 estrellas`}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className={i < rev.rating ? 'star-filled' : 'star-empty'}>★</span>
-                  ))}
-                </div>
-                <strong>{rev.title}</strong>
-                <p className="detail-copy">{rev.comment}</p>
-                <p className="review-author">{rev.author}</p>
-              </div>
-            ))
-          ) : (
-            <>
-              <div className="fake-box">
-                <div className="review-stars" aria-label="5 de 5 estrellas">
-                  <span className="star-filled">★</span>
-                  <span className="star-filled">★</span>
-                  <span className="star-filled">★</span>
-                  <span className="star-filled">★</span>
-                  <span className="star-filled">★</span>
-                </div>
-                <strong>Diseño excelente</strong>
-                <p className="detail-copy">Se adapta perfectamente al día a día. Estética súper limpia.</p>
-                <p className="review-author">Cliente verificado</p>
-              </div>
-              <div className="fake-box">
-                <div className="review-stars" aria-label="4 de 5 estrellas">
-                  <span className="star-filled">★</span>
-                  <span className="star-filled">★</span>
-                  <span className="star-filled">★</span>
-                  <span className="star-filled">★</span>
-                  <span className="star-empty">★</span>
-                </div>
-                <strong>Muy recomendable</strong>
-                <p className="detail-copy">Calidad excelente, aunque tardó un poco más en llegar.</p>
-                <p className="review-author">Cliente verificado</p>
-              </div>
-            </>
-          )}
-        </div>
+        {reviewsLoading ? (
+          <p className="lead">Cargando opiniones...</p>
+        ) : reviewsError ? (
+          <ReviewList reviews={product.reviews || []} />
+        ) : (
+          <ReviewList reviews={reviews && reviews.length > 0 ? reviews : product.reviews || []} />
+        )}
       </div>
     </section>
   );

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import ProductCard from '../ProductCard/ProductCard';
 
-function ProductGrid({ products }) {
+function ProductGrid({ products = [], loading = false, error = null }) {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const validProducts = Array.isArray(products) ? products : [];
+
   // Dynamically extract unique categories and add "Todos" at the start
-  const categories = ["Todos", ...new Set(products.map(p => p.category))];
+  const categories = ["Todos", ...new Set(validProducts.map(p => p.category).filter(Boolean))];
 
   // Filter products based on selected category AND search query
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = validProducts.filter(product => {
     const matchesCategory = selectedCategory === "Todos" || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (product.name || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -58,17 +60,32 @@ function ProductGrid({ products }) {
         </div>
       </div>
 
-      <div className="product-grid compact-grid elegant-grid">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))
-        ) : (
-          <div className="panel" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem' }}>
-            <p className="lead">No se encontraron productos que coincidan con la búsqueda.</p>
-          </div>
-        )}
-      </div>
+      {loading && (
+        <div className="panel loading-state" style={{ textAlign: 'center', padding: '3rem' }}>
+          <div className="spinner"></div>
+          <p className="lead">Cargando catálogo de productos...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="panel error-banner" style={{ textAlign: 'center', padding: '2rem' }}>
+          <p className="lead">Error al cargar productos: {error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="product-grid compact-grid elegant-grid">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <div className="panel" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem' }}>
+              <p className="lead">No se encontraron productos que coincidan con la búsqueda.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

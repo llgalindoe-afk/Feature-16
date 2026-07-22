@@ -1,11 +1,13 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 
 function Header() {
   return (
     <header className="topbar">
       <div className="brand-block">
-        <h1>Cositas Lab</h1>
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <h1>Cositas Lab</h1>
+        </Link>
       </div>
       <nav className="topnav">
         <NavLink 
@@ -20,6 +22,18 @@ function Header() {
           className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
         >
           Catálogo
+        </NavLink>
+        <NavLink 
+          to="/login" 
+          className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+        >
+          Login
+        </NavLink>
+        <NavLink 
+          to="/register" 
+          className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+        >
+          Registro
         </NavLink>
       </nav>
     </header>
