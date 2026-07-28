@@ -27,7 +27,7 @@ function Header() {
     <header className="topbar">
       <div className="brand-block">
         <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <h1>Cositas Lab</h1>
+          <h1>Cositas LAB</h1>
         </Link>
       </div>
       <nav className="topnav" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

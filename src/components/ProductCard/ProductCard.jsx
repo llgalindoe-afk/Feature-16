@@ -17,7 +17,22 @@ function ProductCard({ product }) {
       <Link to={`/products/${product.id}`} className="product-card product-card-link">
         <img src={getImageUrl(product)} alt={product.name} className="product-image" />
         <div className="product-body">
-          <p className="product-category">{product.category}</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p className="product-category" style={{ margin: 0 }}>{product.category}</p>
+            {product.ropa && (
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                background: '#111',
+                color: '#fff',
+                padding: '0.15rem 0.4rem',
+                borderRadius: '4px'
+              }}>
+                Ropa
+              </span>
+            )}
+          </div>
           <h3>{product.name}</h3>
           <p className="product-description">{product.description}</p>
           <div className="product-footer">

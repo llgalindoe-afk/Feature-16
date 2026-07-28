@@ -62,7 +62,23 @@ function ProductDetailPage() {
 
         <div className="panel stack-lg detail-info">
           <div className="detail-header-block">
-            <p className="eyebrow">{product.category}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <p className="eyebrow" style={{ margin: 0 }}>{product.category}</p>
+              {product.ropa && (
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  background: '#111',
+                  color: '#fff',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '100px'
+                }}>
+                  Prenda de vestir
+                </span>
+              )}
+            </div>
             <h2>{product.name}</h2>
             <p className="lead">{product.description}</p>
           </div>
@@ -72,21 +88,23 @@ function ProductDetailPage() {
             <strong>{Number(product.price).toFixed(2)} €</strong>
           </div>
 
-          <div className="detail-section">
-            <p className="detail-label">Talla</p>
-            <div className="size-grid">
-              {["40", "41", "42", "43"].map(size => (
-                <button
-                  key={size}
-                  type="button"
-                  className={`size-chip ${selectedSize === size ? 'active-size' : ''}`}
-                  onClick={() => setSelectedSize(size)}
-                >
-                  {size}
-                </button>
-              ))}
+          {product.ropa && (
+            <div className="detail-section">
+              <p className="detail-label">Talla</p>
+              <div className="size-grid">
+                {["40", "41", "42", "43"].map(size => (
+                  <button
+                    key={size}
+                    type="button"
+                    className={`size-chip ${selectedSize === size ? 'active-size' : ''}`}
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="detail-section">
             <p className="detail-label">Cantidad</p>
@@ -111,8 +129,11 @@ function ProductDetailPage() {
             <Button
               variant="primary"
               onClick={() => {
-                dispatch(addCartItem({ productId: product.id, quantity, size: selectedSize, product }));
-                alert(`¡Añadido al carrito! ${quantity}x ${product.name} (Talla ${selectedSize})`);
+                dispatch(addCartItem({ productId: product.id, quantity, size: product.ropa ? selectedSize : null, product }));
+                alert(product.ropa 
+                  ? `¡Añadido al carrito! ${quantity}x ${product.name} (Talla ${selectedSize})`
+                  : `¡Añadido al carrito! ${quantity}x ${product.name}`
+                );
               }}
               style={{ flex: 1 }}
             >
