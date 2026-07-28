@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getWishlist, toggleWishlistApi, removeFromWishlist } from '../api/wishlist';
+import { getWishlist, toggleWishlistApi } from '../api/wishlist';
 
 export const fetchWishlist = createAsyncThunk(
   'wishlist/fetch',
@@ -67,7 +67,7 @@ const wishlistSlice = createSlice({
         state.error = action.payload;
       })
       // Toggle Wishlist
-      .addCase(toggleWishlist.pending, (state) => {
+      .addCase(toggleWishlist.pending, () => {
         // Smooth local transition
       })
       .addCase(toggleWishlist.fulfilled, (state, action) => {

@@ -13,7 +13,7 @@ const getInitialState = () => {
       loading: false,
       error: null,
     };
-  } catch (error) {
+  } catch {
     return {
       token: null,
       user: null,
