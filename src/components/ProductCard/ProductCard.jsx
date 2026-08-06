@@ -9,7 +9,8 @@ function ProductCard({ product }) {
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
       return url;
     }
-    return `http://localhost:3000/${url}`;
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    return `${apiBaseUrl}/${url}`;
   };
 
   return (

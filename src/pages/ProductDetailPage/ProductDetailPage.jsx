@@ -54,7 +54,7 @@ function ProductDetailPage() {
       <div className="detail-layout detail-editorial elegant-detail">
         <div className="panel image-panel detail-gallery">
           <img 
-            src={product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `http://localhost:3000/${product.imageUrl}`) : product.image || 'https://via.placeholder.com/400'} 
+            src={product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/${product.imageUrl}`) : product.image || 'https://via.placeholder.com/400'} 
             alt={product.name} 
             className="detail-image" 
           />
