@@ -15,17 +15,18 @@ api.interceptors.response.use(
   },
   async (error) => {
     if (error.response && error.response.status === 401) {
-      // Dispatch logout dynamically to avoid circular dependencies
-      try {
-        const { default: store } = await import('../store');
-        const { logout } = await import('../store/authSlice');
-        store.dispatch(logout());
-      } catch (err) {
-        console.error('Error dispatching logout from axios interceptor:', err);
-      }
+      const isAuthPath = error.config.url.includes('/api/auth/profile') || error.config.url.includes('/api/auth/login');
       
-      // Force redirect to login page
-      window.location.href = '/login';
+      if (!isAuthPath) {
+        // Dispatch logout dynamically to avoid circular dependencies
+        try {
+          const { default: store } = await import('../store');
+          const { logout } = await import('../store/authSlice');
+          store.dispatch(logout());
+        } catch (err) {
+          console.error('Error dispatching logout from axios interceptor:', err);
+        }
+      }
     }
     return Promise.reject(error);
   }
