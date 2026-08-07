@@ -8,6 +8,26 @@ const api = axios.create({
   }
 });
 
+// Request Interceptor: Attach JWT Token from Redux memory if present
+api.interceptors.request.use(
+  async (config) => {
+    try {
+      const { default: store } = await import('../store');
+      const state = store.getState();
+      const token = state.auth?.token;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (err) {
+      // Silently ignore store import errors during initialization
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Response Interceptor: Handle 401 Unauthorized
 api.interceptors.response.use(
   (response) => {
