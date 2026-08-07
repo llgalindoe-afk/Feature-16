@@ -4,7 +4,8 @@ import { login as loginApi, register as registerApi, getProfile as getProfileApi
 const getInitialState = () => {
   return {
     user: null,
-    loading: true, // Start as true to check active session on boot
+    isInitialized: false, // Tracks initial boot session check
+    loading: false,
     error: null,
   };
 };
@@ -85,15 +86,14 @@ const authSlice = createSlice({
     builder
       // Check Session
       .addCase(checkSessionThunk.pending, (state) => {
-        state.loading = true;
         state.error = null;
       })
       .addCase(checkSessionThunk.fulfilled, (state, action) => {
-        state.loading = false;
+        state.isInitialized = true;
         state.user = action.payload.user;
       })
       .addCase(checkSessionThunk.rejected, (state) => {
-        state.loading = false;
+        state.isInitialized = true;
         state.user = null;
       })
       // Login

@@ -6,13 +6,13 @@ import { router } from './router';
 
 function App() {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.auth);
+  const { isInitialized } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(checkSessionThunk());
   }, [dispatch]);
 
-  if (loading) {
+  if (!isInitialized) {
     return (
       <div style={{
         display: 'flex',
