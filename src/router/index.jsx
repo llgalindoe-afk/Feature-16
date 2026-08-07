@@ -12,6 +12,8 @@ import CartPage from '../pages/CartPage/CartPage';
 import WishlistPage from '../pages/WishlistPage/WishlistPage';
 import ProfilePage from '../pages/ProfilePage/ProfilePage';
 import CheckoutSuccessPage from '../pages/CheckoutSuccessPage/CheckoutSuccessPage';
+import AdminRoute from '../components/AdminRoute/AdminRoute';
+import AdminPage from '../pages/AdminPage/AdminPage';
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +58,15 @@ export const router = createBrowserRouter([
           {
             path: 'checkout',
             element: <CheckoutSuccessPage />
+          }
+        ]
+      },
+      {
+        element: <AdminRoute />,
+        children: [
+          {
+            path: 'admin',
+            element: <AdminPage />
           }
         ]
       },

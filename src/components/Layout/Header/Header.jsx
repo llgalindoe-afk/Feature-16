@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../../store/authSlice';
+import { logout, selectIsAdmin } from '../../../store/authSlice';
 import { fetchCart } from '../../../store/cartSlice';
 import { fetchWishlist } from '../../../store/wishlistSlice';
 
 function Header() {
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
+  const isAdmin = useSelector(selectIsAdmin);
   const { items } = useSelector((state) => state.cart);
 
   useEffect(() => {
@@ -76,6 +77,15 @@ function Header() {
             >
               Wishlist
             </NavLink>
+            {isAdmin && (
+              <NavLink 
+                to="/admin" 
+                className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                style={{ color: '#ef4444', fontWeight: 'bold' }}
+              >
+                Admin
+              </NavLink>
+            )}
             <NavLink 
               to="/profile" 
               className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}

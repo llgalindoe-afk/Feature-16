@@ -113,4 +113,5 @@ const authSlice = createSlice({
 });
 
 export const { logout, clearError } = authSlice.actions;
+export const selectIsAdmin = (state) => state.auth.user?.role?.toUpperCase() === 'ADMIN';
 export default authSlice.reducer;
