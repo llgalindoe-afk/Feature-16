@@ -4,10 +4,10 @@ import { useSelector } from 'react-redux';
 import { selectIsAdmin } from '../../store/authSlice';
 
 function AdminRoute({ children }) {
-  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const isAdmin = useSelector(selectIsAdmin);
 
-  if (!token) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

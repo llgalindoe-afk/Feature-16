@@ -2,24 +2,11 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 });
-
-// Request Interceptor: Attach JWT Token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // Response Interceptor: Handle 401 Unauthorized
 api.interceptors.response.use(
@@ -28,9 +15,6 @@ api.interceptors.response.use(
   },
   async (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      
       // Dispatch logout dynamically to avoid circular dependencies
       try {
         const { default: store } = await import('../store');

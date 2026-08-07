@@ -6,7 +6,7 @@ import { toggleWishlist } from '../../store/wishlistSlice';
 function WishlistButton({ product }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const { productIds } = useSelector((state) => state.wishlist);
 
   const isFavorited = productIds.includes(product.id);
@@ -14,7 +14,7 @@ function WishlistButton({ product }) {
   const handleToggle = (e) => {
     e.preventDefault(); // Prevent navigating if this button is inside a Link card
     e.stopPropagation();
-    if (!token) {
+    if (!user) {
       navigate('/login');
       return;
     }

@@ -1,25 +1,25 @@
 import React, { useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout, selectIsAdmin } from '../../../store/authSlice';
+import { logoutThunk, selectIsAdmin } from '../../../store/authSlice';
 import { fetchCart } from '../../../store/cartSlice';
 import { fetchWishlist } from '../../../store/wishlistSlice';
 
 function Header() {
   const dispatch = useDispatch();
-  const { token, user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const isAdmin = useSelector(selectIsAdmin);
   const { items } = useSelector((state) => state.cart);
 
   useEffect(() => {
-    if (token) {
+    if (user) {
       dispatch(fetchCart());
       dispatch(fetchWishlist());
     }
-  }, [token, dispatch]);
+  }, [user, dispatch]);
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutThunk());
   };
 
   const cartItemsCount = items.reduce((acc, item) => acc + item.quantity, 0);
@@ -46,7 +46,7 @@ function Header() {
           Catálogo
         </NavLink>
 
-        {token ? (
+        {user ? (
           <>
             <NavLink 
               to="/cart" 

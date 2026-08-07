@@ -1,51 +1,40 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login as loginApi, register as registerApi, getProfile as getProfileApi } from '../api/auth';
 
-// Helper to get initial state from localStorage safely
 const getInitialState = () => {
-  try {
-    const token = localStorage.getItem('token') || null;
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    return {
-      token,
-      user,
-      loading: false,
-      error: null,
-    };
-  } catch {
-    return {
-      token: null,
-      user: null,
-      loading: false,
-      error: null,
-    };
-  }
+  return {
+    user: null,
+    loading: true, // Start as true to check active session on boot
+    error: null,
+  };
 };
+
+export const checkSessionThunk = createAsyncThunk(
+  'auth/checkSession',
+  async (_, { rejectWithValue }) => {
+    try {
+      const profileResponse = await getProfileApi();
+      const user = profileResponse.data || profileResponse;
+      return { user };
+    } catch (error) {
+      const message = error.response?.data?.error || error.response?.data?.message || error.message || 'Error de sesión';
+      return rejectWithValue(message);
+    }
+  }
+);
 
 export const loginThunk = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const data = await loginApi(credentials);
-      const token = data.token || data.accessToken || null;
+      // 1. Post credentials (backend sets httpOnly cookie)
+      await loginApi(credentials);
       
-      if (!token) {
-        throw new Error('El servidor no devolvió un token de acceso.');
-      }
-      
-      // Save token in localStorage temporarily so that axios interceptors can read it for getProfile call
-      localStorage.setItem('token', token);
-      
-      // Fetch user profile using the token
+      // 2. Fetch user profile
       const profileResponse = await getProfileApi();
       const user = profileResponse.data || profileResponse;
-      
-      localStorage.setItem('user', JSON.stringify(user));
-      return { token, user };
+      return { user };
     } catch (error) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
       const message = error.response?.data?.error || error.response?.data?.message || error.message || 'Error al iniciar sesión';
       return rejectWithValue(message);
     }
@@ -65,17 +54,28 @@ export const registerThunk = createAsyncThunk(
   }
 );
 
+export const logoutThunk = createAsyncThunk(
+  'auth/logoutThunk',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { logout: logoutApi } = await import('../api/auth');
+      await logoutApi();
+      return true;
+    } catch (error) {
+      const message = error.response?.data?.error || error.message || 'Error al cerrar sesión';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: getInitialState(),
   reducers: {
     logout: (state) => {
-      state.token = null;
       state.user = null;
       state.loading = false;
       state.error = null;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
     },
     clearError: (state) => {
       state.error = null;
@@ -83,6 +83,19 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Check Session
+      .addCase(checkSessionThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(checkSessionThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(checkSessionThunk.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
+      })
       // Login
       .addCase(loginThunk.pending, (state) => {
         state.loading = true;
@@ -90,7 +103,6 @@ const authSlice = createSlice({
       })
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
         state.user = action.payload.user;
       })
       .addCase(loginThunk.rejected, (state, action) => {
@@ -108,6 +120,20 @@ const authSlice = createSlice({
       .addCase(registerThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // Logout Thunk
+      .addCase(logoutThunk.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(logoutThunk.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.error = null;
+      })
+      .addCase(logoutThunk.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.error = null;
       });
   }
 });

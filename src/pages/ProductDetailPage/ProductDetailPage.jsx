@@ -12,7 +12,7 @@ import { addCartItem } from '../../store/cartSlice';
 function ProductDetailPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   
   const [selectedSize, setSelectedSize] = useState("40");
   const [quantity, setQuantity] = useState(1);
@@ -174,7 +174,7 @@ function ProductDetailPage() {
         ) : (
           <ReviewList reviews={reviews && reviews.length > 0 ? reviews : product.reviews || []} />
         )}
-        {token && (
+        {user && (
           <ReviewForm productId={product.id} onReviewAdded={refresh} />
         )}
       </div>
