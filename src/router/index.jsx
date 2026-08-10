@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
             element: <ProfilePage />
           },
           {
-            path: 'checkout',
+            path: 'checkout/success',
             element: <CheckoutSuccessPage />
           }
         ]
