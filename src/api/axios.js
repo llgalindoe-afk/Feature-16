@@ -8,18 +8,12 @@ const api = axios.create({
   }
 });
 
-// Request Interceptor: Attach JWT Token from Redux memory if present
+// Request Interceptor: Attach JWT Token from sessionStorage if present (cross-site fallback)
 api.interceptors.request.use(
-  async (config) => {
-    try {
-      const { default: store } = await import('../store');
-      const state = store.getState();
-      const token = state.auth?.token;
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (err) {
-      // Silently ignore store import errors during initialization
+  (config) => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -38,6 +32,9 @@ api.interceptors.response.use(
       const isAuthPath = error.config.url.includes('/api/auth/profile') || error.config.url.includes('/api/auth/login');
       
       if (!isAuthPath) {
+        // Clear cross-site fallback token
+        sessionStorage.removeItem('token');
+        
         // Dispatch logout dynamically to avoid circular dependencies
         try {
           const { default: store } = await import('../store');
