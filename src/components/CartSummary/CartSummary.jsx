@@ -1,13 +1,9 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { checkoutThunk } from '../../store/cartSlice';
+import React, { useState } from 'react';
+import { checkout } from '../../api/checkout';
 import Button from '../Button/Button';
 
 function CartSummary({ items }) {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { loading } = useSelector((state) => state.cart);
+  const [loadingStripe, setLoadingStripe] = useState(false);
 
   const subtotal = items.reduce((acc, item) => {
     if (!item.product) return acc;
@@ -20,9 +16,18 @@ function CartSummary({ items }) {
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
-    const result = await dispatch(checkoutThunk());
-    if (checkoutThunk.fulfilled.match(result)) {
-      navigate('/checkout');
+    setLoadingStripe(true);
+    try {
+      const cartItems = items.map(item => ({
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity
+      }));
+      const url = await checkout(cartItems);
+      window.location.href = url;
+    } catch (err) {
+      alert("Error al iniciar el checkout: " + (err.response?.data?.error || err.message));
+      setLoadingStripe(false);
     }
   };
 
@@ -55,10 +60,10 @@ function CartSummary({ items }) {
       <Button 
         variant="primary" 
         onClick={handleCheckout} 
-        disabled={loading || items.length === 0}
+        disabled={loadingStripe || items.length === 0}
         style={{ width: '100%', marginTop: '1rem' }}
       >
-        {loading ? 'Procesando pago...' : 'Realizar Pedido'}
+        {loadingStripe ? 'Redirigiendo a Stripe...' : 'Realizar Pedido'}
       </Button>
     </div>
   );

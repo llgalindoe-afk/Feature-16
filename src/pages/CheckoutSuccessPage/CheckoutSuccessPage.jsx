@@ -1,7 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { checkoutThunk } from '../../store/cartSlice';
 
 function CheckoutSuccessPage() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Clear the cart in the database and Redux store upon successful checkout redirect
+    dispatch(checkoutThunk());
+  }, [dispatch]);
+
   return (
     <div className="auth-container">
       <div className="panel auth-card" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
